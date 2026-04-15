@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DollarSign, Users, TrendingUp, Share2, MoreHorizontal } from 'lucide-react';
 import Header from '../../layout/Header';
 import { StatCard, Table, Tr, Td, Pagination, Badge, Confirm, Modal } from '../../ui';
@@ -8,33 +8,41 @@ import { affiliatesApi } from '../../../services/api';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
-const MOCK_AFFILIATES: Affiliate[] = Array.from({ length: 15 }, (_, i) => ({
-  id:               `aff-${i}`,
-  user_id:          `user-${i}`,
-  user_email:       `affiliate${i}@example.com`,
-  user_name:        `Affiliate ${i + 1}`,
-  referral_code:    `AVT${(1000 + i).toString()}`,
-  total_referrals:  Math.floor(Math.random() * 50 + 5),
-  paid_referrals:   Math.floor(Math.random() * 30),
-  total_earnings:   Math.floor(Math.random() * 500 + 20),
-  pending_earnings: Math.floor(Math.random() * 100),
-  status:           (['active', 'suspended', 'pending'] as any[])[i % 3],
-  created_at:       new Date(Date.now() - i * 86400000 * 10).toISOString(),
-}));
-
 export default function AffiliatesPage() {
-  const [affiliates, setAffiliates] = useState(MOCK_AFFILIATES);
+  const [affiliates, setAffiliates] = useState<any[]>([]);
   const [selected,   setSelected]   = useState<Affiliate | null>(null);
   const [menuOpen,   setMenuOpen]   = useState<string | null>(null);
   const [payoutOpen, setPayoutOpen] = useState(false);
   const [confirmSuspend, setConfirmSuspend] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  const totals = affiliates.reduce((acc, a) => ({
+  const totals = affiliates?.reduce((acc, a) => ({
     earnings:  acc.earnings  + a.total_earnings,
     pending:   acc.pending   + a.pending_earnings,
     referrals: acc.referrals + a.total_referrals,
   }), { earnings: 0, pending: 0, referrals: 0 });
+
+  async function load() {
+    setLoading(true);
+
+    try {
+      const result = await affiliatesApi.getAll({
+        page,
+        limit: 10,
+      })
+      setAffiliates(result?.data?.data)
+      setTotal(result?.data?.total)
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+    
+  useEffect(() => { load(); }, [page]);
 
   async function handleStatusChange(id: string, status: string) {
     try {
@@ -52,109 +60,102 @@ export default function AffiliatesPage() {
     } catch { toast.error('Failed to process payout'); }
   }
 
-  return <div className="animate-fade-in">
-            <Header title="Affiliates" subtitle="Referral program management" />
-            <div className="p-6 space-y-6">
-      
-            </div>
+  return (
+    <div className="animate-fade-in">
+      <Header title="Affiliates" subtitle="Referral program management" />
+      <div className="p-6 space-y-6">
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Total Affiliates"  value={affiliates.length} icon={<Users size={18} />} />
+          <StatCard label="Active" value={affiliates.filter(a => a.status === 'active').length} icon={<Share2 size={18} />} color="text-emerald-400" />
+          <StatCard label="Total Earnings"    value={formatCurrency(totals.earnings)}  icon={<DollarSign size={18} />} color="text-emerald-400" />
+          <StatCard label="Pending Payouts"   value={formatCurrency(totals.pending)}   icon={<TrendingUp size={18} />} color="text-amber-400" />
         </div>
 
-  // return (
-  //   <div className="animate-fade-in">
-  //     <Header title="Affiliates" subtitle="Referral program management" />
-  //     <div className="p-6 space-y-6">
+        <div className="card overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/5">
+            <h3 className="font-display font-600 text-white text-sm">Affiliates</h3>
+          </div>
+          <Table headers={['Affiliate', 'Code', 'Referrals', 'Earnings', 'Pending', 'Status', '']}>
+            {affiliates.map(a => (
+              <Tr key={a.id}>
+                <Td>
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-full bg-brand-600/20 flex items-center justify-center text-xs font-medium text-brand-400 flex-shrink-0">
+                      {a.user_name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-white/80 text-sm font-medium">{a.user_name}</p>
+                      <p className="text-white/30 text-[10px]">{a.user_email}</p>
+                    </div>
+                  </div>
+                </Td>
+                <Td>
+                  <code className="text-xs text-brand-400 bg-brand-400/10 px-2 py-0.5 rounded font-mono">{a.referral_code}</code>
+                </Td>
+                <Td>
+                  <p className="text-white/70 text-sm">{a.total_referrals}</p>
+                  <p className="text-white/25 text-[10px]">{a.paid_referrals} paid</p>
+                </Td>
+                <Td><p className="text-emerald-400 font-medium text-sm">{formatCurrency(a.total_earnings)}</p></Td>
+                <Td><p className="text-amber-400 text-sm">{formatCurrency(a.pending_earnings)}</p></Td>
+                <Td><Badge className={statusColor(a.status)}>{a.status}</Badge></Td>
+                <Td>
+                  <div className="relative">
+                    <button onClick={() => setMenuOpen(menuOpen === a.id ? null : a.id)}
+                      className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors">
+                      <MoreHorizontal size={15} />
+                    </button>
+                    {menuOpen === a.id && (
+                      <div className="absolute right-0 top-8 w-40 bg-surface-3 border border-white/10 rounded-xl shadow-xl z-10 py-1">
+                        <button onClick={() => { setSelected(a); setPayoutOpen(true); setMenuOpen(null); }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
+                          <DollarSign size={12} /> Process Payout
+                        </button>
+                        <button onClick={() => { setConfirmSuspend(a.id); setMenuOpen(null); }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-400 hover:bg-red-400/5">
+                          <Users size={12} /> {a.status === 'suspended' ? 'Activate' : 'Suspend'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </Td>
+              </Tr>
+            ))}
+          </Table>
+          <Pagination page={page} totalPages={total} onChange={setPage} />
+        </div>
+      </div>
 
-  //       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-  //         <StatCard label="Total Affiliates"  value={affiliates.length}                icon={<Users size={18} />} />
-  //         <StatCard label="Active"            value={affiliates.filter(a => a.status === 'active').length} icon={<Share2 size={18} />} color="text-emerald-400" />
-  //         <StatCard label="Total Earnings"    value={formatCurrency(totals.earnings)}  icon={<DollarSign size={18} />} color="text-emerald-400" />
-  //         <StatCard label="Pending Payouts"   value={formatCurrency(totals.pending)}   icon={<TrendingUp size={18} />} color="text-amber-400" />
-  //       </div>
+      {/* Payout modal */}
+      <Modal open={payoutOpen} onClose={() => setPayoutOpen(false)} title="Process Payout">
+        {selected && (
+          <div className="space-y-4">
+            <p className="text-sm text-white/50">
+              Process payout for <span className="text-white">{selected.user_name}</span>
+            </p>
+            <div className="bg-surface-3 rounded-lg p-4 flex items-center justify-between">
+              <p className="text-xs text-white/40">Pending Amount</p>
+              <p className="text-amber-400 font-display font-700 text-lg">{formatCurrency(selected.pending_earnings)}</p>
+            </div>
+            <div className="flex gap-3 justify-end pt-2">
+              <button className="btn-secondary" onClick={() => setPayoutOpen(false)}>Cancel</button>
+              <button className="btn-primary" onClick={() => handlePayout(selected.id, selected.pending_earnings)}>
+                Confirm Payout
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
-  //       <div className="card overflow-hidden">
-  //         <div className="px-5 py-4 border-b border-white/5">
-  //           <h3 className="font-display font-600 text-white text-sm">Affiliates</h3>
-  //         </div>
-  //         <Table headers={['Affiliate', 'Code', 'Referrals', 'Earnings', 'Pending', 'Status', '']}>
-  //           {affiliates.map(a => (
-  //             <Tr key={a.id}>
-  //               <Td>
-  //                 <div className="flex items-center gap-3">
-  //                   <div className="w-7 h-7 rounded-full bg-brand-600/20 flex items-center justify-center text-xs font-medium text-brand-400 flex-shrink-0">
-  //                     {a.user_name.charAt(0)}
-  //                   </div>
-  //                   <div>
-  //                     <p className="text-white/80 text-sm font-medium">{a.user_name}</p>
-  //                     <p className="text-white/30 text-[10px]">{a.user_email}</p>
-  //                   </div>
-  //                 </div>
-  //               </Td>
-  //               <Td>
-  //                 <code className="text-xs text-brand-400 bg-brand-400/10 px-2 py-0.5 rounded font-mono">{a.referral_code}</code>
-  //               </Td>
-  //               <Td>
-  //                 <p className="text-white/70 text-sm">{a.total_referrals}</p>
-  //                 <p className="text-white/25 text-[10px]">{a.paid_referrals} paid</p>
-  //               </Td>
-  //               <Td><p className="text-emerald-400 font-medium text-sm">{formatCurrency(a.total_earnings)}</p></Td>
-  //               <Td><p className="text-amber-400 text-sm">{formatCurrency(a.pending_earnings)}</p></Td>
-  //               <Td><Badge className={statusColor(a.status)}>{a.status}</Badge></Td>
-  //               <Td>
-  //                 <div className="relative">
-  //                   <button onClick={() => setMenuOpen(menuOpen === a.id ? null : a.id)}
-  //                     className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors">
-  //                     <MoreHorizontal size={15} />
-  //                   </button>
-  //                   {menuOpen === a.id && (
-  //                     <div className="absolute right-0 top-8 w-40 bg-surface-3 border border-white/10 rounded-xl shadow-xl z-10 py-1">
-  //                       <button onClick={() => { setSelected(a); setPayoutOpen(true); setMenuOpen(null); }}
-  //                         className="flex items-center gap-2 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
-  //                         <DollarSign size={12} /> Process Payout
-  //                       </button>
-  //                       <button onClick={() => { setConfirmSuspend(a.id); setMenuOpen(null); }}
-  //                         className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-400 hover:bg-red-400/5">
-  //                         <Users size={12} /> {a.status === 'suspended' ? 'Activate' : 'Suspend'}
-  //                       </button>
-  //                     </div>
-  //                   )}
-  //                 </div>
-  //               </Td>
-  //             </Tr>
-  //           ))}
-  //         </Table>
-  //         <Pagination page={page} totalPages={2} onChange={setPage} />
-  //       </div>
-  //     </div>
-
-  //     {/* Payout modal */}
-  //     <Modal open={payoutOpen} onClose={() => setPayoutOpen(false)} title="Process Payout">
-  //       {selected && (
-  //         <div className="space-y-4">
-  //           <p className="text-sm text-white/50">
-  //             Process payout for <span className="text-white">{selected.user_name}</span>
-  //           </p>
-  //           <div className="bg-surface-3 rounded-lg p-4 flex items-center justify-between">
-  //             <p className="text-xs text-white/40">Pending Amount</p>
-  //             <p className="text-amber-400 font-display font-700 text-lg">{formatCurrency(selected.pending_earnings)}</p>
-  //           </div>
-  //           <div className="flex gap-3 justify-end pt-2">
-  //             <button className="btn-secondary" onClick={() => setPayoutOpen(false)}>Cancel</button>
-  //             <button className="btn-primary" onClick={() => handlePayout(selected.id, selected.pending_earnings)}>
-  //               Confirm Payout
-  //             </button>
-  //           </div>
-  //         </div>
-  //       )}
-  //     </Modal>
-
-  //     <Confirm
-  //       open={!!confirmSuspend}
-  //       onClose={() => setConfirmSuspend(null)}
-  //       onConfirm={() => confirmSuspend && handleStatusChange(confirmSuspend, affiliates.find(a => a.id === confirmSuspend)?.status === 'suspended' ? 'active' : 'suspended')}
-  //       title="Update Affiliate Status"
-  //       message="This will change the affiliate's status. They will be notified."
-  //       danger
-  //     />
-  //   </div>
-  // );
+      <Confirm
+        open={!!confirmSuspend}
+        onClose={() => setConfirmSuspend(null)}
+        onConfirm={() => confirmSuspend && handleStatusChange(confirmSuspend, affiliates.find(a => a.id === confirmSuspend)?.status === 'suspended' ? 'active' : 'suspended')}
+        title="Update Affiliate Status"
+        message="This will change the affiliate's status. They will be notified."
+        danger
+      />
+    </div>
+  );
 }
