@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, ToggleLeft, ToggleRight, ShieldCheck } from 'lucide-react';
 import Header from '../../layout/Header';
-import { Table, Tr, Td, Badge, Modal, Confirm, Empty, Pagination } from '../../ui';
+import { Table, Tr, Td, Badge, Modal, Confirm, Empty, Pagination, Loading } from '../../ui';
 import { AdminUser, AdminRole } from '../../../types';
 import { formatDate, roleColor, timeAgo } from '../../../utils/format';
 import { adminsApi } from '../../../services/api';
@@ -98,7 +98,7 @@ export default function AdminsPage() {
             </button>
           </div>
 
-          {admins.length === 0 ? <Empty title="No admins found" /> : (
+          {loading ? <Loading/> : admins.length === 0 ? <Empty title="No admins found" /> : (
             <>
               <Table headers={['Admin', 'Role', 'Status', 'Last Login', 'Added', '']}>
                 {admins.map(a => (

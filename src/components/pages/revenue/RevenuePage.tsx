@@ -112,217 +112,221 @@ export default function RevenuePage() {
   return (
     <div className="animate-fade-in">
       <Header title="Revenue" subtitle="Subscriptions & payment tracking" />
-      <div className="p-6 space-y-6">
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label="Monthly Revenue"
-            value={formatCurrency(stats?.total_revenue_month || 0)}
-          />
+      {
+        loading ? <Loading/> : 
+        <div className="p-6 space-y-6">
 
-          <StatCard
-            label="MRR"
-            value={formatCurrency(stats?.mrr || 0)}
-          />
+          {/* Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              label="Monthly Revenue"
+              value={formatCurrency(stats?.total_revenue_month || 0)}
+            />
 
-          <StatCard
-            label="Active Subs"
-            value={stats?.active_subscriptions || 0}
-          />
+            <StatCard
+              label="MRR"
+              value={formatCurrency(stats?.mrr || 0)}
+            />
 
-          <StatCard
-            label="Churned / Month"
-            value={stats?.churned_this_month || 0}
-          />
-        </div>
+            <StatCard
+              label="Active Subs"
+              value={stats?.active_subscriptions || 0}
+            />
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="card p-5 lg:col-span-2">
-            <h3 className="font-display font-600 text-white text-sm mb-1">Revenue by Provider</h3>
-            <p className="text-xs text-white/30 mb-5">Last 30 days</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={stats?.revenue_chart}>
-                <defs>
-                  <linearGradient id="gs" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7F77DD" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#7F77DD" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#ffffff40' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#ffffff40' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="stripe"   name="Stripe"   stroke="#7F77DD" fill="url(#gs)" strokeWidth={2} />
-                <Area type="monotone" dataKey="paystack" name="Paystack" stroke="#10B981" fill="url(#gp)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <StatCard
+              label="Churned / Month"
+              value={stats?.churned_this_month || 0}
+            />
           </div>
 
-          <div className="card p-5">
-            <h3 className="font-display font-600 text-white text-sm mb-1">Provider Split</h3>
-            <p className="text-xs text-white/30 mb-4">Revenue share</p>
-            <ResponsiveContainer width="100%" height={150}>
-              <PieChart>
-                <Pie data={providerData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={3}>
-                  {providerData?.map((d, i) => <Cell key={i} fill={d.color} />)}
-                </Pie>
-                <Tooltip formatter={(v: any) => formatCurrency(v)} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="space-y-2 mt-3">
-              {providerData?.map(p => (
-                <div key={p.name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-                    <span className="text-white/50">{p.name}</span>
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="card p-5 lg:col-span-2">
+              <h3 className="font-display font-600 text-white text-sm mb-1">Revenue by Provider</h3>
+              <p className="text-xs text-white/30 mb-5">Last 30 days</p>
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={stats?.revenue_chart}>
+                  <defs>
+                    <linearGradient id="gs" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#7F77DD" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#7F77DD" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gp" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#ffffff40' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#ffffff40' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="stripe"   name="Stripe"   stroke="#7F77DD" fill="url(#gs)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="paystack" name="Paystack" stroke="#10B981" fill="url(#gp)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="card p-5">
+              <h3 className="font-display font-600 text-white text-sm mb-1">Provider Split</h3>
+              <p className="text-xs text-white/30 mb-4">Revenue share</p>
+              <ResponsiveContainer width="100%" height={150}>
+                <PieChart>
+                  <Pie data={providerData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={3}>
+                    {providerData?.map((d, i) => <Cell key={i} fill={d.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: any) => formatCurrency(v)} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="space-y-2 mt-3">
+                {providerData?.map(p => (
+                  <div key={p.name} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                      <span className="text-white/50">{p.name}</span>
+                    </div>
+                    <span className="text-white/70 font-medium">{formatCurrency(p.value)}</span>
                   </div>
-                  <span className="text-white/70 font-medium">{formatCurrency(p.value)}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Subscriptions table */}
-        <div className="card overflow-hidden">
-          <div>
-            <div className="flex items-center gap-4 px-5 pt-5 pb-4 border-b border-white/5">
-              <h3 className="font-display font-600 text-white text-sm flex-1">Subscriptions</h3>
-              {['subscriptions', 'transactions'].map(t => (
-                <button key={t} onClick={() => setTab(t as any)}
-                  className={`text-xs px-3 py-1.5 rounded-lg transition-colors capitalize ${tab === t ? 'bg-brand-600/20 text-brand-400' : 'text-white/30 hover:text-white/60'}`}>
-                  {t}
-                </button>
-              ))}
+          {/* Subscriptions table */}
+          <div className="card overflow-hidden">
+            <div>
+              <div className="flex items-center gap-4 px-5 pt-5 pb-4 border-b border-white/5">
+                <h3 className="font-display font-600 text-white text-sm flex-1">Subscriptions</h3>
+                {['subscriptions', 'transactions'].map(t => (
+                  <button key={t} onClick={() => setTab(t as any)}
+                    className={`text-xs px-3 py-1.5 rounded-lg transition-colors capitalize ${tab === t ? 'bg-brand-600/20 text-brand-400' : 'text-white/30 hover:text-white/60'}`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+              {tab === 'subscriptions' && (
+                <div className="flex gap-3 px-5 py-3 border-b border-white/5">
+                  
+                  <select
+                    value={provider}
+                    onChange={(e) => {
+                      setSubsPage(1);
+                      setProvider(e.target.value);
+                    }}
+                    className="input text-xs"
+                  >
+                    <option value="">All Providers</option>
+                    <option value="stripe">Stripe</option>
+                    <option value="paystack">Paystack</option>
+                    {/* <option value="flutterwave">Flutterwave</option> */}
+                  </select>
+
+                  <select
+                    value={status}
+                    onChange={(e) => {
+                      setSubsPage(1);
+                      setStatus(e.target.value);
+                    }}
+                    className="input text-xs"
+                  >
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+
+                </div>
+              )}
             </div>
             {tab === 'subscriptions' && (
-              <div className="flex gap-3 px-5 py-3 border-b border-white/5">
-                
-                <select
-                  value={provider}
-                  onChange={(e) => {
-                    setSubsPage(1);
-                    setProvider(e.target.value);
-                  }}
-                  className="input text-xs"
-                >
-                  <option value="">All Providers</option>
-                  <option value="stripe">Stripe</option>
-                  <option value="paystack">Paystack</option>
-                  {/* <option value="flutterwave">Flutterwave</option> */}
-                </select>
+              <>
+                <Table headers={['User', 'Plan', 'Provider', 'Status', 'Period End']}>
+                  {subs.map((s) => (
+                    <Tr key={s.id}>
+                      <Td>
+                        <p className="text-white/70 text-xs">{s.users?.email}</p>
+                      </Td>
 
-                <select
-                  value={status}
-                  onChange={(e) => {
-                    setSubsPage(1);
-                    setStatus(e.target.value);
-                  }}
-                  className="input text-xs"
-                >
-                  <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                      <Td>
+                        <div>
+                          <span className="text-white/70 capitalize">{s.plan_tier}</span>
+                          <p className="text-white/25 text-[10px]">{s.billing_period}</p>
+                        </div>
+                      </Td>
 
-              </div>
+                      <Td>
+                        <span
+                          className="text-xs font-medium capitalize"
+                          style={{ color: (PROVIDER_COLORS as any)[s.provider] }}
+                        >
+                          {s.provider}
+                        </span>
+                      </Td>
+
+                      <Td>
+                        <Badge className={statusColor(s.status)}>
+                          {s.status}
+                        </Badge>
+                      </Td>
+
+                      <Td>
+                        <p className="text-white/50 text-xs">
+                          {formatDate(s.current_period_end)}
+                        </p>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Table>
+
+                <Pagination
+                  page={subsPage}
+                  totalPages={subsTotal}
+                  onChange={setSubsPage}
+                />
+              </>
+            )}
+            {tab === 'transactions' && (
+              <>
+                <Table headers={['User', 'Credits', 'Amount', 'Reference', 'Date']}>
+                  {txs.map((t) => (
+                    <Tr key={t.id}>
+                      <Td>
+                        <p className="text-white/70 text-xs">{t.users?.email}</p>
+                      </Td>
+
+                      <Td>
+                        <span className="text-white/70 text-xs">{t.credits} Packs</span>
+                      </Td>
+
+                      <Td>
+                        <span className="text-white font-medium text-xs">
+                          {formatCurrency(t.price_paid)}
+                        </span>
+                      </Td>
+
+                      <Td>
+                        <span className="text-white/50 text-xs truncate max-w-[120px] block">
+                          {t.reference}
+                        </span>
+                      </Td>
+
+                      <Td>
+                        <span className="text-white/50 text-xs">
+                          {formatDate(t.created_at)}
+                        </span>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Table>
+
+                <Pagination
+                  page={txPage}
+                  totalPages={txTotal}
+                  onChange={setTxPage}
+                />
+              </>
             )}
           </div>
-          {tab === 'subscriptions' && (
-            <>
-              <Table headers={['User', 'Plan', 'Provider', 'Status', 'Period End']}>
-                {subs.map((s) => (
-                  <Tr key={s.id}>
-                    <Td>
-                      <p className="text-white/70 text-xs">{s.users?.email}</p>
-                    </Td>
-
-                    <Td>
-                      <div>
-                        <span className="text-white/70 capitalize">{s.plan_tier}</span>
-                        <p className="text-white/25 text-[10px]">{s.billing_period}</p>
-                      </div>
-                    </Td>
-
-                    <Td>
-                      <span
-                        className="text-xs font-medium capitalize"
-                        style={{ color: (PROVIDER_COLORS as any)[s.provider] }}
-                      >
-                        {s.provider}
-                      </span>
-                    </Td>
-
-                    <Td>
-                      <Badge className={statusColor(s.status)}>
-                        {s.status}
-                      </Badge>
-                    </Td>
-
-                    <Td>
-                      <p className="text-white/50 text-xs">
-                        {formatDate(s.current_period_end)}
-                      </p>
-                    </Td>
-                  </Tr>
-                ))}
-              </Table>
-
-              <Pagination
-                page={subsPage}
-                totalPages={subsTotal}
-                onChange={setSubsPage}
-              />
-            </>
-          )}
-          {tab === 'transactions' && (
-            <>
-              <Table headers={['User', 'Credits', 'Amount', 'Reference', 'Date']}>
-                {txs.map((t) => (
-                  <Tr key={t.id}>
-                    <Td>
-                      <p className="text-white/70 text-xs">{t.users?.email}</p>
-                    </Td>
-
-                    <Td>
-                      <span className="text-white/70 text-xs">{t.credits} Packs</span>
-                    </Td>
-
-                    <Td>
-                      <span className="text-white font-medium text-xs">
-                        {formatCurrency(t.price_paid)}
-                      </span>
-                    </Td>
-
-                    <Td>
-                      <span className="text-white/50 text-xs truncate max-w-[120px] block">
-                        {t.reference}
-                      </span>
-                    </Td>
-
-                    <Td>
-                      <span className="text-white/50 text-xs">
-                        {formatDate(t.created_at)}
-                      </span>
-                    </Td>
-                  </Tr>
-                ))}
-              </Table>
-
-              <Pagination
-                page={txPage}
-                totalPages={txTotal}
-                onChange={setTxPage}
-              />
-            </>
-          )}
         </div>
-      </div>
+      }
     </div>
   );
 }

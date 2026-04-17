@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Filter, ScrollText } from 'lucide-react';
 import Header from '../../layout/Header';
 import { Loading, Empty, Table, Tr, Td, Pagination, Badge } from '../../ui';
 import { AdminLog } from '../../../types';
 import { formatDateTime, roleColor } from '../../../utils/format';
 import clsx from 'clsx';
+import { logsApi } from '@/services/api';
 
 const ACTION_COLOR: Record<string, string> = {
   'user.plan_update':     'text-brand-400  bg-brand-400/10',
@@ -18,25 +19,38 @@ const ACTION_COLOR: Record<string, string> = {
   'support.reply':        'text-blue-400   bg-blue-400/10',
 };
 
-const MOCK_LOGS: AdminLog[] = Array.from({ length: 30 }, (_, i) => ({
-  id:          `log-${i}`,
-  admin_id:    `admin-${i % 3}`,
-  admin_name:  ['Bami', 'Support 1', 'Dev'][i % 3],
-  admin_role:  (['super_admin', 'support', 'developer'] as any[])[i % 3],
-  action:      ['user.plan_update', 'user.delete', 'user.reset_usage', 'admin.create', 'affiliate.payout', 'support.reply'][i % 6],
-  target_type: ['user', 'admin', 'affiliate', 'ticket'][i % 4],
-  target_id:   `target-${i}`,
-  metadata:    { plan: 'pro', email: `user${i}@example.com` },
-  ip_address:  `192.168.1.${i}`,
-  created_at:  new Date(Date.now() - i * 3600000).toISOString(),
-}));
+function formatMetadata(metadata: Record<string, any>) {
+  const entries: { key: string; value: string }[] = [];
+
+  Object.entries(metadata || {}).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+
+    // Handle nested object (like prices)
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      Object.entries(value).forEach(([k, v]) => {
+        entries.push({
+          key: `${key}.${k}`,
+          value: String(v),
+        });
+      });
+    } else {
+      entries.push({
+        key,
+        value: String(value),
+      });
+    }
+  });
+
+  return entries;
+}
 
 export default function LogsPage() {
-  const [logs,     setLogs]     = useState(MOCK_LOGS);
+  const [logs,     setLogs]     = useState<any[]>([]);
   const [loading,  setLoading]  = useState(false);
   const [search,   setSearch]   = useState('');
   const [filter,   setFilter]   = useState('all');
   const [page,     setPage]     = useState(1);
+  const [total, setTotal] = useState(0);
 
   const filtered = logs.filter(l =>
     (filter === 'all' || l.action.startsWith(filter)) &&
@@ -45,12 +59,26 @@ export default function LogsPage() {
 
   const categories = ['all', 'user', 'admin', 'affiliate', 'support'];
 
-  return <div className="animate-fade-in">
-                <Header title="Audit Logs" subtitle="All admin actions are recorded here" />
-                <div className="p-6 space-y-6">
-          
-                </div>
-            </div>
+  async function load() {
+    setLoading(true);
+
+    try {
+      const result = await logsApi.getAll({
+        page,
+        limit: 10,
+      })
+      setLogs(result?.data?.data)
+      setTotal(result?.data?.total)
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+    
+  useEffect(() => { load(); }, [page]);
+
 
   return (
     <div className="animate-fade-in">
@@ -97,8 +125,11 @@ export default function LogsPage() {
                   </Td>
                   <Td>
                     <div className="text-xs text-white/30 space-y-0.5">
-                      {Object.entries(log.metadata).slice(0, 2).map(([k, v]) => (
-                        <p key={k}><span className="text-white/20">{k}:</span> {String(v)}</p>
+                      {formatMetadata(log.metadata).slice(0, 3).map((item) => (
+                        <p key={item.key}>
+                          <span className="text-white/20">{item.key}:</span>{' '}
+                          <span className="text-white/60">{item.value}</span>
+                        </p>
                       ))}
                     </div>
                   </Td>
@@ -108,7 +139,7 @@ export default function LogsPage() {
               ))}
             </Table>
           )}
-          <Pagination page={page} totalPages={Math.ceil(filtered.length / 20)} onChange={setPage} />
+          <Pagination page={page} totalPages={total} onChange={setPage} />
         </div>
       </div>
     </div>

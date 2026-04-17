@@ -92,59 +92,63 @@ export default function SupportPage() {
   return (
     <div className="animate-fade-in">
       <Header title="Support" subtitle="Customer tickets & requests" />
-      <div className="p-6 space-y-4">
 
-        {/* Status filters */}
-        <div className="flex gap-3 flex-wrap">
-          {Object.entries(statusCounts).map(([s, count]) => (
-            <button key={s} onClick={() => setFilter(s)}
-              className={clsx('flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors capitalize', filter === s ? 'bg-brand-600/20 text-brand-400' : 'btn-secondary')}>
-              {s.replace('_', ' ')}
-              <span className={clsx('px-1.5 py-0.5 rounded-full text-[10px]', filter === s ? 'bg-brand-400/20' : 'bg-white/10')}>{count}</span>
-            </button>
-          ))}
-        </div>
+      {
+        loading ? <Loading/> : 
+        <div className="p-6 space-y-4">
 
-        <div className="card overflow-hidden">
-          <Table headers={['Subject', 'User', 'Priority', 'Status', 'Created', '']}>
-            {filtered.map(t => (
-              <Tr key={t.id} onClick={() => { setSelected(t); setTicketOpen(true); }}>
-                <Td>
-                  <div className="flex items-center gap-2">
-                    <MessageCircle size={14} className="text-white/20 flex-shrink-0" />
-                    <p className="text-white/80 font-medium text-sm">{t.subject}</p>
-                  </div>
-                </Td>
-                <Td>
-                  <p className="text-white/60 text-xs">{t.user_name}</p>
-                  <p className="text-white/25 text-[10px]">{t.user_email}</p>
-                </Td>
-                <Td><Badge className={PRIORITY_COLORS[t.priority]}>{t.priority}</Badge></Td>
-                <Td>
-                  <Badge className={clsx(statusColor(t.status), 'flex items-center gap-1')}>
-                    {STATUS_ICONS[t.status]} {t.status.replace('_', ' ')}
-                  </Badge>
-                </Td>
-                <Td><p className="text-white/40 text-xs">{timeAgo(t.created_at)}</p></Td>
-                <Td>
-                  {canManage && (
-                    <select value={t.status}
-                      onChange={e => { e.stopPropagation(); handleStatusChange(t.id, e.target.value); }}
-                      onClick={e => e.stopPropagation()}
-                      className="input text-xs py-1 h-7 w-28">
-                      <option value="open">Open</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                  )}
-                </Td>
-              </Tr>
+          {/* Status filters */}
+          <div className="flex gap-3 flex-wrap">
+            {Object.entries(statusCounts).map(([s, count]) => (
+              <button key={s} onClick={() => setFilter(s)}
+                className={clsx('flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors capitalize', filter === s ? 'bg-brand-600/20 text-brand-400' : 'btn-secondary')}>
+                {s.replace('_', ' ')}
+                <span className={clsx('px-1.5 py-0.5 rounded-full text-[10px]', filter === s ? 'bg-brand-400/20' : 'bg-white/10')}>{count}</span>
+              </button>
             ))}
-          </Table>
-          <Pagination page={page} totalPages={total} onChange={setPage} />
+          </div>
+
+          <div className="card overflow-hidden">
+            <Table headers={['Subject', 'User', 'Priority', 'Status', 'Created', '']}>
+              {filtered.map(t => (
+                <Tr key={t.id} onClick={() => { setSelected(t); setTicketOpen(true); }}>
+                  <Td>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle size={14} className="text-white/20 flex-shrink-0" />
+                      <p className="text-white/80 font-medium text-sm">{t.subject}</p>
+                    </div>
+                  </Td>
+                  <Td>
+                    <p className="text-white/60 text-xs">{t.user_name}</p>
+                    <p className="text-white/25 text-[10px]">{t.user_email}</p>
+                  </Td>
+                  <Td><Badge className={PRIORITY_COLORS[t.priority]}>{t.priority}</Badge></Td>
+                  <Td>
+                    <Badge className={clsx(statusColor(t.status), 'flex items-center gap-1')}>
+                      {STATUS_ICONS[t.status]} {t.status.replace('_', ' ')}
+                    </Badge>
+                  </Td>
+                  <Td><p className="text-white/40 text-xs">{timeAgo(t.created_at)}</p></Td>
+                  <Td>
+                    {canManage && (
+                      <select value={t.status}
+                        onChange={e => { e.stopPropagation(); handleStatusChange(t.id, e.target.value); }}
+                        onClick={e => e.stopPropagation()}
+                        className="input text-xs py-1 h-7 w-28">
+                        <option value="open">Open</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Table>
+            <Pagination page={page} totalPages={total} onChange={setPage} />
+          </div>
         </div>
-      </div>
+      }
 
       {/* Ticket detail modal */}
       <Modal open={ticketOpen} onClose={() => setTicketOpen(false)} title="Ticket Details">

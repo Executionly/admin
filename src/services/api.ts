@@ -61,6 +61,7 @@ export const revenueApi = {
 // ── Analytics ─────────────────────────────────────────────────
 export const analyticsApi = {
   getVisitors:  (period: string) => api.get(`/admin/analytics/visitors?period=${period}`),
+  getVisitorsChart:  (period: string) => api.get(`/admin/analytics/visitors/chart?period=${period}`),
   getEvents:    (params: any)    => api.get('/admin/analytics/events', { params }),
   getTopPages:  () => api.get('/admin/analytics/top-pages'),
 };
@@ -82,9 +83,10 @@ export const chatApi = {
 // ── Affiliates ────────────────────────────────────────────────
 export const affiliatesApi = {
   getAll:    (params: any) => api.get('/admin/affiliates', { params }),
+  getAllWithdrawals:    (params: any) => api.get('/admin/affiliates/withdrawals', { params }),
   getOne:    (id: string)  => api.get(`/admin/affiliates/${id}`),
   updateStatus: (id: string, status: string) => api.patch(`/admin/affiliates/${id}/status`, { status }),
-  payout:    (id: string, amount: number)    => api.post(`/admin/affiliates/${id}/payout`, { amount }),
+  payout:    (id: string, action: 'approve' | 'reject')    => api.post(`/admin/affiliates/${id}/payout`, { status }),
 };
 
 // ── Admins ────────────────────────────────────────────────────
