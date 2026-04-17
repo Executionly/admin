@@ -4,7 +4,7 @@ import Header from '../../layout/Header';
 import { chatApi } from '../../../services/api';
 import { useAppSelector } from '../../../hooks/useStore';
 import { roleColor, timeAgo } from '../../../utils/format';
-import { Badge } from '../../ui';
+import { Badge, Loading } from '../../ui';
 import toast from 'react-hot-toast';
 
 interface Message {
@@ -25,10 +25,79 @@ const MOCK_MESSAGES: Message[] = [
 
 export default function ChatPage() {
   const { user }      = useAppSelector(s => s.auth);
-  const [messages, setMessages] = useState(MOCK_MESSAGES);
+  const [messages, setMessages] = useState<any[]>([]);
   const [text,     setText]     = useState('');
   const [sending,  setSending]  = useState(false);
   const bottomRef  = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  async function load(pageToLoad = page) {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const result = await chatApi.getMessages(pageToLoad);
+
+      const newMessages = result?.data?.messages || [];
+
+      setMessages(prev => {
+        if (pageToLoad === 1) {
+          return newMessages;
+        }
+        return [...newMessages, ...prev];
+      });
+
+      setTotal(result?.data?.total);
+
+      if (newMessages.length === 0) {
+        setHasMore(false);
+      }
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+    
+  useEffect(() => {
+    load(1);
+  }, []);
+
+  const handleScroll = () => {
+    const el = containerRef.current;
+    if (!el || loading || !hasMore) return;
+
+    if (el.scrollTop === 0) {
+      const prevHeight = el.scrollHeight;
+
+      const nextPage = page + 1;
+      setPage(nextPage);
+
+      load(nextPage).then(() => {
+        // maintain scroll position
+        requestAnimationFrame(() => {
+          if (!containerRef.current) return;
+          containerRef.current.scrollTop =
+            containerRef.current.scrollHeight - prevHeight;
+        });
+      });
+    }
+  };
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [page, loading, hasMore]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -66,19 +135,15 @@ export default function ChatPage() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   }
 
-  return <div className="animate-fade-in">
-          <Header title="Team Chat" subtitle="Internal admin communication" />
-          <div className="p-6 space-y-6">
-    
-          </div>
-      </div>
-
   return (
     <div className="animate-fade-in flex flex-col h-screen">
       <Header title="Team Chat" subtitle="Internal admin communication" />
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((m, i) => {
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+        {loading && page > 1 && (
+          <p className="text-center text-xs text-white/40">Loading more...</p>
+        )}
+        {loading ? <Loading/> : messages.map((m, i) => {
           const isMe    = m.sender_id === user?.id;
           const showAvatar = i === 0 || messages[i - 1].sender_id !== m.sender_id;
           return (

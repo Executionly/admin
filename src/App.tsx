@@ -15,6 +15,8 @@ import AffiliatesPage  from './components/pages/affiliates/AffiliatesPage';
 import AdminsPage      from './components/pages/admins/AdminsPage';
 import LogsPage        from './components/pages/logs/LogsPage';
 import SettingsPage    from './components/pages/settings/SettingsPage';
+import PlansPage from './components/pages/plans/PlansPage';
+import ErrorLogsPage from './components/pages/error-logs/ErrorLogs';
 
 export default function App() {
   return (
@@ -39,6 +41,10 @@ export default function App() {
             <Route path="admins"     element={<ProtectedRoute permission="VIEW_ADMINS">      <AdminsPage />     </ProtectedRoute>} />
             <Route path="logs"       element={<ProtectedRoute permission="VIEW_LOGS">        <LogsPage />       </ProtectedRoute>} />
             <Route path="settings"   element={<ProtectedRoute permission="VIEW_SETTINGS">    <SettingsPage />   </ProtectedRoute>} />
+            <Route path="plans"   element={<ProtectedRoute permission="VIEW_PLANS">    <PlansPage />   </ProtectedRoute>} />
+            <Route path="error-logs" element={
+              <ProtectedRoute permission="VIEW_ERROR_LOGS"><ErrorLogsPage /></ProtectedRoute>
+            } />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

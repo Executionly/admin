@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Users, DollarSign, BarChart2, HeadphonesIcon,
   MessageSquare, Share2, ShieldCheck, ScrollText, Settings,
   ChevronLeft, Zap, LogOut,
+  AlertCircle,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/useStore';
 import { toggleCollapse } from '../../store/slices/uiSlice';
@@ -21,6 +22,8 @@ const NAV = [
   { to: '/affiliates',  label: 'Affiliates',  icon: Share2,          permission: 'VIEW_AFFILIATES'   as const },
   { to: '/admins',      label: 'Admins',      icon: ShieldCheck,     permission: 'VIEW_ADMINS'       as const },
   { to: '/logs',        label: 'Audit Logs',  icon: ScrollText,      permission: 'VIEW_LOGS'         as const },
+  { to: '/error-logs', label: 'Error Logs', icon: AlertCircle, permission: 'VIEW_ERROR_LOGS' as const },
+  { to: '/plans',    label: 'Plans Config',    icon: Zap,        permission: 'VIEW_PLANS'     as const },
   { to: '/settings',    label: 'Settings',    icon: Settings,        permission: 'VIEW_SETTINGS'     as const },
 ];
 

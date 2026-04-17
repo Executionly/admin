@@ -29,17 +29,10 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  return <div className="animate-fade-in">
-              <Header title="Settings" subtitle="Platform configuration" />
-              <div className="p-6 space-y-6">
-        
-              </div>
-          </div>
-
   return (
     <div className="animate-fade-in">
       <Header title="Settings" subtitle="Platform configuration" />
-      <div className="p-6 max-w-2xl space-y-6">
+      <div className="p-6 w-full space-y-6">
 
         {/* General */}
         <div className="card p-5">
@@ -56,14 +49,14 @@ export default function SettingsPage() {
             <div>
               <label className="text-xs text-white/40 block mb-1.5">App Name</label>
               <input value={general.app_name} onChange={e => setGeneral(p => ({ ...p, app_name: e.target.value }))}
-                className="input" disabled={!canManage} />
+                className="input" disabled={!canManage} readOnly/>
             </div>
             <div>
               <label className="text-xs text-white/40 block mb-1.5">Support Email</label>
               <input value={general.support_email} onChange={e => setGeneral(p => ({ ...p, support_email: e.target.value }))}
-                className="input" disabled={!canManage} />
+                className="input" disabled={!canManage} readOnly />
             </div>
-            <div className="flex items-center justify-between py-2">
+            {/* <div className="flex items-center justify-between py-2">
               <div>
                 <p className="text-sm text-white/70">Maintenance Mode</p>
                 <p className="text-xs text-white/30">Temporarily disable access for users</p>
@@ -74,12 +67,12 @@ export default function SettingsPage() {
                 className={`w-10 h-5 rounded-full transition-colors relative ${general.maintenance_mode ? 'bg-red-500' : 'bg-surface-4'}`}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${general.maintenance_mode ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="card p-5">
+        {/* <div className="card p-5">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-8 h-8 rounded-lg bg-amber-400/20 flex items-center justify-center">
               <Bell size={15} className="text-amber-400" />
@@ -109,7 +102,7 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* API Keys — developer only */}
         {hasPermission(user!.role, 'VIEW_SETTINGS') && (
@@ -125,8 +118,16 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-3">
               {[
-                'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'STRIPE_SECRET_KEY',
-                'PAYSTACK_SECRET_KEY', 'RESEND_API_KEY', 'SENTRY_DSN',
+                'SUPABASE_URL','SUPABASE_ANON_KEY','SUPABASE_SERVICE_ROLE_KEY',
+                'ADMIN_JWT_SECRET','GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_CALLBACK_URL',
+                'FRONTEND_URL','OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'STRIPE_SECRET_KEY',
+                'STRIPE_WEBHOOK_SECRET','STRIPE_PRICE_STARTER_MONTHLY','STRIPE_PRICE_STARTER_YEARLY',
+                'STRIPE_PRICE_DAILY_WEEKLY','STRIPE_PRICE_DAILY_MONTHLY','STRIPE_PRICE_DAILY_YEARLY',
+                'STRIPE_PRICE_PRO_MONTHLY','STRIPE_PRICE_PRO_YEARLY',
+                'PAYSTACK_SECRET_KEY','PAYSTACK_WEBHOOK_SECRET','PAYSTACK_PLAN_STARTER_MONTHLY',
+                'PAYSTACK_PLAN_STARTER_YEARLY','PAYSTACK_PLAN_DAILY_WEEKLY','PAYSTACK_PLAN_DAILY_MONTHLY',
+                'PAYSTACK_PLAN_DAILY_YEARLY','PAYSTACK_PLAN_PRO_MONTHLY','PAYSTACK_PLAN_PRO_YEARLY', 
+                'RESEND_API_KEY', 'MAIL_FROM', 'PAYMENT_PROVIDER_AFRICA',
               ].map(key => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
                   <code className="text-xs font-mono text-white/50">{key}</code>
@@ -137,11 +138,11 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {canManage && (
+        {/* {canManage && (
           <button onClick={handleSave} className="btn-primary w-full py-2.5">
             {saved ? '✓ Saved' : 'Save Changes'}
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -93,109 +93,113 @@ export default function UsersPage() {
   return (
     <div className="animate-fade-in">
       <Header title="Users" subtitle={`${total?.toLocaleString()} total users`} />
-      <div className="p-6 space-y-4">
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
-          <form onSubmit={handleSearch} className="relative flex-1 min-w-48">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              className="input pl-8 h-9 text-sm" placeholder="Search by name or email..." />
-          </form>
-          <div className="flex gap-2">
-            {PLANS.map(p => (
-              <button key={p} onClick={() => { setPlan(p); setPage(1); }}
-                className={clsx('text-xs px-3 py-1.5 rounded-lg transition-colors capitalize', planFilter === p ? 'bg-brand-600/20 text-brand-400' : 'btn-secondary')}>
-                {p}
-              </button>
-            ))}
+      {
+        loading ? <Loading/> : 
+        <div className="p-6 space-y-4">
+
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <form onSubmit={handleSearch} className="relative flex-1 min-w-48">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                className="input pl-8 h-9 text-sm" placeholder="Search by name or email..." />
+            </form>
+            <div className="flex gap-2">
+              {PLANS.map(p => (
+                <button key={p} onClick={() => { setPlan(p); setPage(1); }}
+                  className={clsx('text-xs px-3 py-1.5 rounded-lg transition-colors capitalize', planFilter === p ? 'bg-brand-600/20 text-brand-400' : 'btn-secondary')}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="card overflow-hidden">
+            {loading ? <Loading /> : filtered?.length === 0 ? <Empty title="No users found" /> : (
+              <Table headers={['User', 'Plan', 'Usage', 'Status', 'Joined', '']}>
+                {filtered?.map(u => (
+                  <Tr key={u.id}>
+                    <Td>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-brand-600/20 flex items-center justify-center text-xs font-medium text-brand-400 flex-shrink-0">
+                          {u.full_name?.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium text-sm">{u.full_name}</p>
+                          <p className="text-white/30 text-xs">{u.email}</p>
+                        </div>
+                      </div>
+                    </Td>
+                    <Td>
+                      <Badge className={planColor(u.plan_tier)}>{u.plan_tier}</Badge>
+                      {u.billing_period && <p className="text-white/25 text-[10px] mt-0.5">{u.billing_period}</p>}
+                    </Td>
+                    <Td>
+                      <div className="text-xs">
+                        <p className="text-white/60">{u.usage_count_today}/{u.usage_limit_today} <span className="text-white/25">today</span></p>
+                        {u.pack_credits > 0 && <p className="text-brand-400">+{u.pack_credits} pack</p>}
+                      </div>
+                    </Td>
+                    <Td>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={u.is_active ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}>
+                          {u.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                        {!u.is_email_verified && <Badge className="text-amber-400 bg-amber-400/10">Unverified</Badge>}
+                      </div>
+                    </Td>
+                    <Td>
+                      <p className="text-white/50 text-xs">{formatDate(u.created_at)}</p>
+                      {u.last_login_at && <p className="text-white/25 text-[10px]">{timeAgo(u.last_login_at)}</p>}
+                    </Td>
+                    <Td>
+                      <div className="relative">
+                        <button onClick={() => setMenuOpen(menuOpen === u.id ? null : u.id)}
+                          className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors">
+                          <MoreHorizontal size={16} />
+                        </button>
+                        {menuOpen === u.id && (
+                          <div className="absolute right-0 top-8 w-44 bg-surface-3 border border-white/10 rounded-xl shadow-xl z-10 py-1">
+                            <button onClick={() => { setSelected(u); setViewOpen(true); setMenuOpen(null); }}
+                              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
+                              <Eye size={13} /> View Details
+                            </button>
+                            {canManage && (
+                              <>
+                                <button onClick={() => { setSelected(u); setNewPlan(u.plan_tier); setPlanOpen(true); setMenuOpen(null); }}
+                                  className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
+                                  <TrendingUp size={13} /> Change Plan
+                                </button>
+                                <button onClick={() => { setConfirmId(u.id); setConfirmAction('reset'); setMenuOpen(null); }}
+                                  className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
+                                  <RefreshCw size={13} /> Reset Usage
+                                </button>
+                                <button onClick={() => { setConfirmId(u.id); setConfirmAction('toggle'); setMenuOpen(null); }}
+                                  className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
+                                  <UserX size={13} /> {u.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                              </>
+                            )}
+                            {canDelete && (
+                              <button onClick={() => { setConfirmId(u.id); setConfirmAction('delete'); setMenuOpen(null); }}
+                                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-red-400 hover:bg-red-400/5">
+                                <UserX size={13} /> Delete User
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </Td>
+                  </Tr>
+                ))}
+              </Table>
+            )}
+            <Pagination page={page} totalPages={Math.ceil(total / PER_PAGE)} onChange={setPage} />
           </div>
         </div>
-
-        {/* Table */}
-        <div className="card overflow-hidden">
-          {loading ? <Loading /> : filtered?.length === 0 ? <Empty title="No users found" /> : (
-            <Table headers={['User', 'Plan', 'Usage', 'Status', 'Joined', '']}>
-              {filtered?.map(u => (
-                <Tr key={u.id}>
-                  <Td>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-brand-600/20 flex items-center justify-center text-xs font-medium text-brand-400 flex-shrink-0">
-                        {u.full_name?.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-white font-medium text-sm">{u.full_name}</p>
-                        <p className="text-white/30 text-xs">{u.email}</p>
-                      </div>
-                    </div>
-                  </Td>
-                  <Td>
-                    <Badge className={planColor(u.plan_tier)}>{u.plan_tier}</Badge>
-                    {u.billing_period && <p className="text-white/25 text-[10px] mt-0.5">{u.billing_period}</p>}
-                  </Td>
-                  <Td>
-                    <div className="text-xs">
-                      <p className="text-white/60">{u.usage_count_today}/{u.usage_limit_today} <span className="text-white/25">today</span></p>
-                      {u.pack_credits > 0 && <p className="text-brand-400">+{u.pack_credits} pack</p>}
-                    </div>
-                  </Td>
-                  <Td>
-                    <div className="flex flex-col gap-1">
-                      <Badge className={u.is_active ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}>
-                        {u.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                      {!u.is_email_verified && <Badge className="text-amber-400 bg-amber-400/10">Unverified</Badge>}
-                    </div>
-                  </Td>
-                  <Td>
-                    <p className="text-white/50 text-xs">{formatDate(u.created_at)}</p>
-                    {u.last_login_at && <p className="text-white/25 text-[10px]">{timeAgo(u.last_login_at)}</p>}
-                  </Td>
-                  <Td>
-                    <div className="relative">
-                      <button onClick={() => setMenuOpen(menuOpen === u.id ? null : u.id)}
-                        className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors">
-                        <MoreHorizontal size={16} />
-                      </button>
-                      {menuOpen === u.id && (
-                        <div className="absolute right-0 top-8 w-44 bg-surface-3 border border-white/10 rounded-xl shadow-xl z-10 py-1">
-                          <button onClick={() => { setSelected(u); setViewOpen(true); setMenuOpen(null); }}
-                            className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
-                            <Eye size={13} /> View Details
-                          </button>
-                          {canManage && (
-                            <>
-                              <button onClick={() => { setSelected(u); setNewPlan(u.plan_tier); setPlanOpen(true); setMenuOpen(null); }}
-                                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
-                                <TrendingUp size={13} /> Change Plan
-                              </button>
-                              <button onClick={() => { setConfirmId(u.id); setConfirmAction('reset'); setMenuOpen(null); }}
-                                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
-                                <RefreshCw size={13} /> Reset Usage
-                              </button>
-                              <button onClick={() => { setConfirmId(u.id); setConfirmAction('toggle'); setMenuOpen(null); }}
-                                className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5">
-                                <UserX size={13} /> {u.is_active ? 'Deactivate' : 'Activate'}
-                              </button>
-                            </>
-                          )}
-                          {canDelete && (
-                            <button onClick={() => { setConfirmId(u.id); setConfirmAction('delete'); setMenuOpen(null); }}
-                              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-red-400 hover:bg-red-400/5">
-                              <UserX size={13} /> Delete User
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </Td>
-                </Tr>
-              ))}
-            </Table>
-          )}
-          <Pagination page={page} totalPages={Math.ceil(total / PER_PAGE)} onChange={setPage} />
-        </div>
-      </div>
+      }
 
       {/* View user modal */}
       <Modal open={viewOpen} onClose={() => setViewOpen(false)} title="User Details">
