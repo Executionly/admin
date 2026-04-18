@@ -10,7 +10,7 @@ export const PERMISSIONS = {
   // Revenue
   VIEW_REVENUE:         ['super_admin', 'admin'],
   // Analytics
-  VIEW_ANALYTICS:       ['super_admin', 'admin', 'developer'],
+  VIEW_ANALYTICS:       ['super_admin', 'admin', 'support'],
   // Support
   VIEW_SUPPORT:         ['super_admin', 'admin', 'support', 'developer'],
   MANAGE_SUPPORT:       ['super_admin', 'admin', 'support', 'developer'],
@@ -32,6 +32,8 @@ export const PERMISSIONS = {
   // Plans
   VIEW_PLANS:        ['super_admin', 'admin'],
   MANAGE_PLANS:      ['super_admin'],
+
+  CHANGE_PASSWORD: ['super_admin','admin','support','developer']
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;

@@ -4,6 +4,7 @@ import {
   MessageSquare, Share2, ShieldCheck, ScrollText, Settings,
   ChevronLeft, Zap, LogOut,
   AlertCircle,
+  Lock,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/useStore';
 import { toggleCollapse } from '../../store/slices/uiSlice';
@@ -24,6 +25,7 @@ const NAV = [
   { to: '/logs',        label: 'Audit Logs',  icon: ScrollText,      permission: 'VIEW_LOGS'         as const },
   { to: '/error-logs', label: 'Error Logs', icon: AlertCircle, permission: 'VIEW_ERROR_LOGS' as const },
   { to: '/plans',    label: 'Plans Config',    icon: Zap,        permission: 'VIEW_PLANS'     as const },
+  { to: '/change-password', label: 'Change Password', icon: Lock, permission: 'CHANGE_PASSWORD' as const },
   { to: '/settings',    label: 'Settings',    icon: Settings,        permission: 'VIEW_SETTINGS'     as const },
 ];
 
