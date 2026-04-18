@@ -17,6 +17,7 @@ import LogsPage        from './components/pages/logs/LogsPage';
 import SettingsPage    from './components/pages/settings/SettingsPage';
 import PlansPage from './components/pages/plans/PlansPage';
 import ErrorLogsPage from './components/pages/error-logs/ErrorLogs';
+import ChangePasswordPage from './components/pages/change-password/ChangePassword';
 
 export default function App() {
   return (
@@ -44,6 +45,9 @@ export default function App() {
             <Route path="plans"   element={<ProtectedRoute permission="VIEW_PLANS">    <PlansPage />   </ProtectedRoute>} />
             <Route path="error-logs" element={
               <ProtectedRoute permission="VIEW_ERROR_LOGS"><ErrorLogsPage /></ProtectedRoute>
+            } />
+            <Route path="change-password" element={
+              <ProtectedRoute permission="CHANGE_PASSWORD"><ChangePasswordPage /></ProtectedRoute>
             } />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
