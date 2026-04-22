@@ -67,20 +67,20 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 interface IStats {
-  visitors: number;
-  page_views: number;
-  new_users: number;
-  conversions: number;
+  total_visitors: number;
+  total_page_views: number;
+  total_new_users: number;
+  total_conversions: number;
 }
 
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState('30d');
   const [loading,  setLoading]  = useState(false);
   const [stats, setStats] = useState<IStats>({
-    visitors: 0,
-    page_views: 0,
-    new_users: 0,
-    conversions: 0,
+    total_visitors: 0,
+    total_page_views: 0,
+    total_new_users: 0,
+    total_conversions: 0,
   })
   const [chartData, setChartData] = useState<any[]>([]);
   const [topPages, setTopPages] = useState<any[]>([]);
@@ -125,10 +125,10 @@ export default function AnalyticsPage() {
         <div className="p-6 space-y-6">
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Total Visitors"  value={formatNumber(stats?.visitors || 0)}    icon={<Eye size={18} />}/>
-            <StatCard label="Page Views"      value={formatNumber(stats?.page_views) || 0}  icon={<MousePointer size={18} />} />
-            <StatCard label="New Users"       value={formatNumber(stats?.new_users) || 0}   icon={<Users size={18} />}color="text-brand-400" />
-            <StatCard label="Conversions"     value={formatNumber(stats?.conversions) || 0} icon={<TrendingUp size={18} />} color="text-emerald-400" />
+            <StatCard label="Total Visitors"  value={formatNumber(stats?.total_visitors || 0)}    icon={<Eye size={18} />}/>
+            <StatCard label="Page Views"      value={formatNumber(stats?.total_page_views) || 0}  icon={<MousePointer size={18} />} />
+            <StatCard label="New Users"       value={formatNumber(stats?.total_new_users) || 0}   icon={<Users size={18} />}color="text-brand-400" />
+            <StatCard label="Conversions"     value={formatNumber(stats?.total_conversions) || 0} icon={<TrendingUp size={18} />} color="text-emerald-400" />
           </div>
 
           {/* Visitors chart */}

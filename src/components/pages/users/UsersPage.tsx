@@ -138,7 +138,7 @@ export default function UsersPage() {
                     </Td>
                     <Td>
                       <div className="text-xs">
-                        <p className="text-white/60">{u.usage_count_today}/{u.usage_limit_today} <span className="text-white/25">today</span></p>
+                        <p className="text-white/60">{u.usage_count_today}/{u.usage_limit_today} <span className="text-white/25">{u?.plan_tier === "trial" ? "today" : "this month"}</span></p>
                         {u.pack_credits > 0 && <p className="text-brand-400">+{u.pack_credits} pack</p>}
                       </div>
                     </Td>
