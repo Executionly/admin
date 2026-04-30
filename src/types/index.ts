@@ -90,6 +90,8 @@ export interface SupportTicket {
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   assigned_to?: string;
+  assigned_admin_name?: string;
+  replies: any[];
   created_at: string;
   updated_at: string;
 }

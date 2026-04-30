@@ -20,10 +20,10 @@ export default function Header({ title, subtitle }: Props) {
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="relative w-8 h-8 rounded-lg bg-surface-3 border border-white/5 flex items-center justify-center text-white/40 hover:text-white/80 transition-colors">
+        {/* <button className="relative w-8 h-8 rounded-lg bg-surface-3 border border-white/5 flex items-center justify-center text-white/40 hover:text-white/80 transition-colors">
           <Bell size={15} />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-brand-400 rounded-full" />
-        </button>
+        </button> */}
         <div className="w-8 h-8 rounded-full bg-brand-600/30 flex items-center justify-center text-xs font-medium text-brand-400">
           {user?.full_name?.charAt(0).toUpperCase()}
         </div>

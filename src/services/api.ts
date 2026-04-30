@@ -70,8 +70,21 @@ export const analyticsApi = {
 export const supportApi = {
   getTickets:   (params: any)   => api.get('/admin/support/tickets', { params }),
   getTicket:    (id: string)    => api.get(`/admin/support/tickets/${id}`),
-  updateTicket: (id: string, data: any) => api.patch(`/admin/support/tickets/${id}`, data),
+  updateTicket: (id: string, updates: {
+    status?: string;
+    priority?: string;
+    assigned_to?: string | null;
+  }) => api.patch(`/admin/support/tickets/${id}`, updates),
   replyTicket:  (id: string, message: string) => api.post(`/admin/support/tickets/${id}/reply`, { message }),
+  createTicket: (data: {
+    subject: string;
+    description: string;
+    priority: 'low' | 'medium' | 'high' | 'urgent';
+    assigned_to?: string;
+    user_id?: string;
+  }) => api.post('/admin/support/tickets', data),
+
+  getAdmins: () => api.get('/admin/support/admins'),
 };
 
 // ── Chat ──────────────────────────────────────────────────────

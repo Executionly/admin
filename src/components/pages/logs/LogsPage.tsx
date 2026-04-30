@@ -53,11 +53,11 @@ export default function LogsPage() {
   const [total, setTotal] = useState(0);
 
   const filtered = logs.filter(l =>
-    (filter === 'all' || l.action.startsWith(filter)) &&
+    (filter === 'all' || l.admin_role?.startsWith(filter)) &&
     (!search || l.admin_name.toLowerCase().includes(search.toLowerCase()) || l.action.includes(search))
   );
 
-  const categories = ['all', 'user', 'admin', 'affiliate', 'support'];
+  const categories = ['all', 'super_admin', 'admin', 'developer', 'support'];
 
   async function load() {
     setLoading(true);
