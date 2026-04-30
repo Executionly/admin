@@ -34,9 +34,9 @@ export function StatCard({ label, value, sub, icon, trend, color = 'text-white' 
 }
 
 // ── Badge ─────────────────────────────────────────────────────
-interface BadgeProps { children: ReactNode; className?: string; }
-export function Badge({ children, className }: BadgeProps) {
-  return <span className={clsx('badge', className)}>{children}</span>;
+interface BadgeProps { children: ReactNode; className?: string; onClick?: ()=>void; }
+export function Badge({ children, className, onClick }: BadgeProps) {
+  return <span onClick={onClick} className={clsx('badge', className)}>{children}</span>;
 }
 
 // ── Loading ───────────────────────────────────────────────────
