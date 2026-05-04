@@ -225,7 +225,7 @@ export default function SupportPage() {
           </div>
 
           <div className="card overflow-hidden">
-            <Table headers={['Subject', 'User', 'Priority', 'Status', 'Replies', 'Created', '']}>
+            <Table headers={['Subject','Assigned To', 'Customer', 'Priority', 'Status', 'Replies', 'Created', '']}>
               {filtered.map(t => (
                 <Tr key={t.id} onClick={() => handleTicketClick(t)}>
                   <Td>
@@ -235,7 +235,11 @@ export default function SupportPage() {
                     </div>
                   </Td>
                   <Td>
-                    <p className="text-white/60 text-xs">{t.user_name}</p>
+                    <p className="text-white/60 text-xs">{t?.assigned_admin?.full_name}</p>
+                    <p className="text-white/25 text-[10px]">{t?.assigned_admin?.email}</p>
+                  </Td>
+                  <Td>
+                    <p className="text-white/60 text-xs">{t.user_name || 'N/A'}</p>
                     <p className="text-white/25 text-[10px]">{t.user_email}</p>
                   </Td>
                   <Td><Badge className={PRIORITY_COLORS[t.priority]}>{t.priority}</Badge></Td>
